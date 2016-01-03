@@ -1,0 +1,150 @@
+Sub AddMenus()
+' AddMenu Macro
+' Macro recorded 11/16/2007 by Don Mitchelll
+'
+'Add Section
+''Change code to reflect cleaner flow
+
+Dim cMenu1 As CommandBarControl
+Dim cbMainMenuBar As CommandBar
+Dim iHelpMenu As Integer
+Dim cNewMenu As CommandBarControl
+Dim cMenuItem As CommandBarPopup
+'Dim cNewMenu As CommandBarPopup 'use this one without sub menus
+'Dim cMenuItem As CommandBarControl 'use this one without sub menus
+Dim sSubMenu As CommandBarButton
+
+    '(1)Delete any existing one.We must use On Error Resume next _
+        in case it does not exist.
+    On Error Resume Next
+    Application.CommandBars("Worksheet Menu Bar").Controls("&Menu").Delete
+
+    '(2)Set a CommandBar variable to Worksheet menu bar
+    Set cbMainMenuBar = Application.CommandBars("Worksheet Menu Bar")
+    
+    '(3)Return the Index number of the Help menu. We can then use _
+        this to place a custom menu before.
+        
+    ''change code to verify if the help button exist
+    
+         iHelpMenu = cbMainMenuBar.Controls("Help").Index
+
+     Set cNewMenu = cbMainMenuBar.Controls.Add(Type:=msoControlPopup, Before:=iHelpMenu)
+
+         cNewMenu.Caption = "&Menu"
+         
+           '------changing code to reconfigure menu
+    
+               
+  '      Set cMenuItem = cNewMenu.Controls.Add _
+  '           (Type:=msoControlPopup)
+  '       With cMenuItem
+  '          .Caption = "Daily Task"
+  '       End With
+           
+'        Set cMenuItem = cNewMenu.Controls.Add _
+'            (Type:=msoControlButton)
+        
+'        With cMenuItem
+'            .Caption = "PAN/Export Report"
+'            .OnAction = "ErrorLogProcess"
+'        End With
+        
+ '       Set cMenuItem = cNewMenu.Controls.Add _
+ '           (Type:=msoControlButton)
+
+ '       With cMenuItem
+ '            .Caption = "Expiration Report"
+ '            .OnAction = "PurgeError"
+ '       End With
+        
+'        Set cMenuItem = cNewMenu.Controls.Add _
+'            (Type:=msoControlButton)
+'
+'        With cMenuItem
+'             .Caption = "No Email UDF"
+'             .OnAction = "NoEmailUDF"
+'            End With
+      
+       ' Set cMenuItem = cNewMenu.Controls.Add _
+       '      (Type:=msoControlPopup)
+       ' With cMenuItem
+       '     .Caption = "PAN Process"
+       '     .BeginGroup = True
+            
+       'End With
+                  
+'        Set cMenuItem = cNewMenu.Controls.Add _
+'            (Type:=msoControlButton)
+         
+'        With cMenuItem
+'               .Caption = "New Candidate Export"
+'             '.FaceId = 420
+  '             .OnAction = "newcandidate"
+ '       End With
+    
+'--------------------------old code -----------------------
+                    '
+      
+      Set cMenuItem = cNewMenu.Controls.Add _
+          (Type:=msoControlPopup)
+         With cMenuItem
+            .Caption = "Daily Task"
+         End With
+        
+        Set cSubMenu = cMenuItem.Controls.Add _
+            (Type:=msoControlButton)
+        
+        With cSubMenu
+            .Caption = "PAN/Export Report"
+            .OnAction = "ErrorLogProcess"
+        End With
+        
+        Set cSubMenu = cMenuItem.Controls.Add _
+            (Type:=msoControlButton)
+
+        With cSubMenu
+             .Caption = "Expiration Report"
+             .OnAction = "PurgeError"
+        End With
+        
+        Set cSubMenu = cMenuItem.Controls.Add _
+            (Type:=msoControlButton)
+            
+        With cSubMenu
+             .Caption = "No Email UDF"
+             .OnAction = "NoEmailUDF"
+            End With
+      
+        Set cMenuItem = cNewMenu.Controls.Add _
+             (Type:=msoControlPopup)
+        With cMenuItem
+            .Caption = "PAN Process"
+            .BeginGroup = True
+            
+        End With
+                  
+        Set cSubMenu = cMenuItem.Controls.Add _
+            (Type:=msoControlButton)
+         
+        With cSubMenu
+               .Caption = "New Candidate Export"
+             '.FaceId = 420
+               .OnAction = "newcandidate"
+        End With
+    
+    
+On Error GoTo 0
+
+End Sub
+
+Sub DeleteMenu()
+    
+On Error Resume Next
+Application.CommandBars("Worksheet Menu Bar").Controls("&TSA Menu").Delete
+    On Error GoTo 0
+End Sub
+
+
+
+
