@@ -1,0 +1,852 @@
+Sub ErrorLogProcess()
+'This macro finds flat file created by _error.vbs and populates the table
+'Macro recorded 1/8/2007 by Don Mitchelll
+'change name of macro from  Errorlog_process to Errorlog
+
+'Diminsion area-----------------
+    Dim rCriterial1 As Range
+    Dim rCriterial2 As Range
+    Dim rCriterial3 As Range
+    Dim rCriterial4 As Range
+    Dim rEvaluate As Variant
+    Dim rEvaluate2
+    Dim lcount1
+    Dim lcount2
+    Dim Wk As Workbook
+    Dim sBoxResult
+    Dim fname
+'-------------------------------
+
+filetoopen = Application _
+    .GetOpenFilename("Text Files (*.txt), *.txt")
+If filetoopen <> False Then
+    MsgBox "Open " & filetoopen
+    End If
+
+'-----
+'write a error check for file opening
+'-----
+
+If filetoopen = False Then
+    MsgBox ("You selected cancel, application will close now")
+Application.Quit
+
+          
+End If
+
+
+Workbooks.OpenText filename:=filetoopen, StartRow:=1, _
+DataType:=xlDelimited, Tab:=True
+
+'Moves the data from a1 to e2 to continue formating and processing
+
+ Range("A1").Select
+ Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+ Application.CutCopyMode = False
+ Selection.Cut
+ Range("E2").Select
+ ActiveSheet.Paste
+
+'Save spreadsheet as "Integration Error Log Report1_MMDDYY.xls"
+
+ ' Sub AddSaveAsNewWorkbook()
+ '   Dim Wk As Workbook
+  '  Set Wk = Workbooks.Add
+  '  Application.DisplayAlerts = False
+  '  Wk.SaveAs Filename:="D:/MyData/SalesData.xls" & Date
+ ' End Sub
+
+
+
+
+'Name the tab "Hourly Error"
+ActiveSheet.Name = "Hourly Errors"
+Worksheets("Hourly Errors").Activate
+
+Cells.Select
+'Format the cell with the font, color
+        With Selection.Font
+        .Name = "Arial"
+        .Size = 8
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .ColorIndex = xlAutomatic
+    End With
+        
+    Rows("1:1").Select
+        With Selection.Interior
+        .ColorIndex = 43
+        .Pattern = xlSolid
+    End With
+
+       
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "Source"
+    Range("B1").Select
+    ActiveCell.FormulaR1C1 = "Reason"
+    Range("C1").Select
+    ActiveCell.FormulaR1C1 = "Action Required By"
+    Range("D1").Select
+    ActiveCell.FormulaR1C1 = "Required Resolution"
+    Range("E1").Select
+    ActiveCell.FormulaR1C1 = "Error Log Date/Time(EST)"
+    Range("F1").Select
+    ActiveCell.FormulaR1C1 = "Candidate"
+    Range("G1").Select
+    ActiveCell.FormulaR1C1 = "Requisition"
+    Range("H1").Select
+    ActiveCell.FormulaR1C1 = "Step"
+    Range("I1").Select
+    ActiveCell.FormulaR1C1 = "Status"
+    Range("J1").Select
+    ActiveCell.FormulaR1C1 = "PAN Step"
+    Range("K1").Select
+    ActiveCell.FormulaR1C1 = "Pan Status"
+    Range("L1").Select
+    ActiveCell.FormulaR1C1 = "Error"
+           
+    Selection.RowHeight = 50
+    Rows("1:1").Select
+    Selection.Font.Bold = True
+        
+    Selection.AutoFilter
+    Columns("A:A").EntireColumn.AutoFit
+    
+'This phase of the macro creates the second page for "Purge Report File"
+
+' CreatePurgeTab Macro
+' Macro recorded 1/5/2007 by Don Mitchelll
+'
+'Create New Sheet
+    'Sheets.Add
+    
+    Sheets.Add after:=Sheets(Sheets.count)  '-- place at end
+    
+    'Sheets.Add Before:=ActiveSheet          '-- default
+    'Sheets.Add After:=ActiveSheet
+    'Rename current Sheet
+     
+     ActiveSheet.Name = "Nightly Purge Error"
+     
+    'ActiveSheet.Name = "D" & Format(Date, "yyyymmdd")
+    'ActiveSheet.Name = "D" & Format(Range("a1"), "yyyymmdd")
+    'ActiveSheet.Name = "D" & Format(Range("a1"), "yyyy_mmdd_hhmm")
+    'Create New Sheet and name it NewSheet
+    'ActiveWorkbook.Worksheets.Add(After:=ActiveSheet).Name = "NewSheet"
+    
+    Worksheets("Nightly Purge Error").Activate
+
+    Rows("1:1").Select
+    With Selection.Interior
+        .ColorIndex = 43
+        .Pattern = xlSolid
+    End With
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "Candidate"
+    Range("B1").Select
+    ActiveCell.FormulaR1C1 = "Test Date"
+    Range("C1").Select
+    ActiveCell.FormulaR1C1 = "PAN error message"
+    Columns("B:B").Select
+    Columns("A:A").EntireColumn.AutoFit
+    Columns("C:C").EntireColumn.AutoFit
+    Rows("1:1").Select
+    Selection.Font.Bold = True
+    With Selection.Font
+        .Name = "Arial"
+        .Size = 9
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .ColorIndex = xlAutomatic
+    End With
+        Range("D13").Select
+
+
+' This macro handles the first 4 deletion steps in the spreadsheet
+' DelStep Macro
+' Macro recorded 1/9/2007 by Don Mitchelll
+' Macro updated 1/18/2007 by Don Mitchell
+'
+
+Sheets("Hourly Errors").Select
+ActiveSheet.Name = "Hourly Errors"
+Worksheets("Hourly Errors").Activate
+
+
+
+'Step 1 : Verified and working correctly
+    Selection.AutoFilter Field:=6, Criteria1:="="
+    Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.ClearContents
+    'add delete up to get rid of blanks
+    Selection.Delete Shift:=xlUp
+    'Selection.EntireRow.Delete
+    
+    Selection.AutoFilter Field:=6
+  
+ 'Step 2 : Verified and working correctly
+    Selection.AutoFilter Field:=8, Criteria1:="No. of Records: 0"
+    Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.ClearContents
+    Selection.AutoFilter Field:=8
+ 
+'Step 3 : Verified and working correctly
+    Selection.AutoFilter Field:=8, Criteria1:="PHASE_II"
+    Set rCriterial1 = Cells.Columns(8).Find(What:="Phase_II")
+    rEvaluate = TypeName(rCriterial1)
+    
+    If rEvaluate = "Nothing" Then
+        Selection.AutoFilter Field:=8
+    Else
+        Selection.AutoFilter Field:=9, Criteria1:="HOLD"
+        Set rCriterial2 = Cells.Columns(9).Find(What:="HOLD")
+        rEvaluate = TypeName(rCriterial2)
+            
+            If rEvaluate = "Nothing" Then
+                Selection.AutoFilter Field:=9
+            Else
+                Selection.AutoFilter Field:=10, Criteria1:="PHASE_II"
+                Set rCriterial3 = Cells.Columns(10).Find(What:="PHASE_II")
+                rEvaluate = TypeName(rCriterial3)
+                
+                      If rEvaluate = "Nothing" Then
+                        Selection.AutoFilter Field:=10
+                      Else
+                        Selection.AutoFilter Field:=11, Criteria1:="HOLD"
+                        Set rCriterial4 = Cells.Columns(11).Find(What:="HOLD")
+                        rEvaluate = TypeName(rCriterial4)
+                        
+                                If rEvaluate = "Nothing" Then
+                                  Selection.AutoFilter Field:=11
+                                Else
+                                                    
+                                  Selection.ClearContents
+  
+    End If
+            End If
+                      End If
+                              End If
+                          
+         'Reset all autofilters for accurate following operations
+  
+                    Selection.AutoFilter Field:=8
+                    Selection.AutoFilter Field:=9
+                    Selection.AutoFilter Field:=10
+                    Selection.AutoFilter Field:=11
+  'Step 4 : Verified and working correctly
+    
+    Selection.AutoFilter Field:=8, Criteria1:="NEW"
+    Set rCriterial1 = Cells.Columns(8).Find(What:="NEW")
+    rEvaluate = TypeName(rCriterial1)
+    
+    If rEvaluate = "Nothing" Then
+        Selection.AutoFilter Field:=8
+    Else
+       Selection.AutoFilter Field:=9, Criteria1:="DUPLICATE AIRPORT OR APPLICATION"
+       Set rCriterial2 = Cells.Columns(9).Find(What:="DUPLICATE AIRPORT OR APPLICATION")
+       rEvaluate = TypeName(rCriterial2)
+       
+            If rEvaluate = "Nothing" Then
+                Selection.AutoFilter Field:=9
+            Else
+                Selection.ClearContents
+                                               
+    End If
+            End If
+                    
+    
+    
+    'Reset all autofilters for accurate following operations
+  
+                    Selection.AutoFilter Field:=8
+                    Selection.AutoFilter Field:=9
+                    Selection.AutoFilter Field:=10
+                    Selection.AutoFilter Field:=11
+    
+                'This brings the deletion section to an end.
+    
+    
+' This macro handles the reminder update steps in the spreadsheet
+' UpdateStep Macro
+' Macro recorded 1/12/2007 by Don Mitchelll
+' Macro updated 1/18/2007 by Don Mitchell
+'
+
+lcount = 0
+rEvaluate2 = 1
+
+'Range("A2").Select ' maybe overkill but want to make sure cursor in right place
+
+'Cleanup spreadsheet of "Blanks" and then set filters to "ALL" and sort data
+
+    Selection.AutoFilter Field:=8, Criteria1:="="
+    Selection.AutoFilter Field:=9, Criteria1:="="
+    Selection.AutoFilter Field:=10, Criteria1:="="
+    Selection.AutoFilter Field:=11, Criteria1:="="
+
+    Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.ClearContents
+   
+    Selection.Delete Shift:=xlUp
+    'Selection.EntireRow.Delete
+        
+        Selection.AutoFilter Field:=1
+        Selection.AutoFilter Field:=2
+        Selection.AutoFilter Field:=3
+        Selection.AutoFilter Field:=4
+        Selection.AutoFilter Field:=5
+        Selection.AutoFilter Field:=6
+        Selection.AutoFilter Field:=7
+        Selection.AutoFilter Field:=8
+        Selection.AutoFilter Field:=9
+        Selection.AutoFilter Field:=10
+        Selection.AutoFilter Field:=11
+
+        Selection.Sort Key1:=Range("E2"), Order1:=xlAscending, Key2:=Range("e2") _
+        , Order2:=xlAscending, Key3:=Range("G2"), Order3:=xlAscending, Header _
+        :=xlGuess, OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom _
+        , DataOption1:=xlSortNormal, DataOption2:=xlSortNormal, DataOption3:= _
+        xlSortNormal
+
+lcount2 = Selection.count / 12 'capture the count in hightlighted area for formatting: total
+                               'number of cells divided by number of columns
+lcount1 = 0                    'initialized at 0 for loop
+
+Do While lcount1 < lcount2
+
+lcount1 = lcount1 + 1
+Dim mish
+mish = Selection.count / 12
+
+
+ActiveCell.Offset(1, 0).Activate 'loop through column A
+
+Select Case rEvaluate2 > 0
+
+
+Case ActiveCell.Offset(0, 11) = "Candidate workflow step and status have been updated for the specified candidate.But an error occurred while sending the email."
+    'done
+             ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+             ActiveCell.FormulaR1C1 = "Candidate"
+             ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+             ActiveCell.FormulaR1C1 = "No Email"
+             ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+             ActiveCell.FormulaR1C1 = "FPMI"
+             ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+             ActiveCell.FormulaR1C1 = "Send manual correspondence"
+             
+             ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+ 
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "REJECTED/FAILED" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "REJECTED"
+    'done
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Process Issue"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "New motive is added. Taleo cannot add motives to already rejected application."
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Add motives to application"
+    
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 11) = "The destination status is the same as the current status."
+     'done
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+              
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+                         
+Case ActiveCell.Offset(0, 7) = "CONDITIONAL" And ActiveCell.Offset(0, 8) = "READY POOL" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "PASSED"
+     'done
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "CONDITIONAL" And ActiveCell.Offset(0, 8) = "READY POOL" And ActiveCell.Offset(0, 9) = "CONDITIONAL" And ActiveCell.Offset(0, 10) = "READY_POOL"
+     'done
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+           
+           
+Case ActiveCell.Offset(0, 7) = "HIRE" And ActiveCell.Offset(0, 8) = "RESULTS EXPIRED"
+     'done
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan/Taleo"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Appears to be revert record;Taleo doesn't revert"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in PAn and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+           
+Case ActiveCell.Offset(0, 7) = "HIRE" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "PASSED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "HIRE" And ActiveCell.Offset(0, 9) = "CONDITIONAL" And ActiveCell.Offset(0, 10) = "READY_POOL"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 8) = "CANDIDATE DECLINED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Process Issue"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Candidate in Declined-- No further CSW moves will occur"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Review for analysis of Declined Candidates Issue"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "PENDING RE-VETTING"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Process Issue"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pending Re-Vetting is a final status. No CSW Move will occur"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "ASSESSMENT RESULTS EXPIRED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Process Issue"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Assessment Results Expired is a final status. No CSW moves will occur"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 8) = "REJECTED/FAILED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan/Taleo"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Appears to be revert record;Taleo doesn't revert"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+      
+ Case ActiveCell.Offset(0, 7) = "EXPIRED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan/Taleo"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Appears to be revert record;Taleo doesn't revert"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "CONDITIONAL" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "REJECTED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan/Taleo"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Appears to be revert record;Taleo doesn't revert"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "HIRE" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "REJECTED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan/Taleo"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Appears to be revert record;Taleo doesn't revert"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "NEW" And ActiveCell.Offset(0, 8) = "NOT ELIGIBLE TO ASSESS" And ActiveCell.Offset(0, 9) = "PHASE_II"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Process Issue"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Aplication moved to Not Eligible To Assess from In Process Other Vacancy by batch process"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "No action"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Application is in correct step & status"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+           
+Case ActiveCell.Offset(0, 11) = "The qualifier invol WD - SLT is not currently available."
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Invalid motive"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Resend with valid motive"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+         
+Case ActiveCell.Offset(0, 11) = "The qualifier SLT Failed is not currently available."
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Invalid motive"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Resend with valid motive"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+      
+Case ActiveCell.Offset(0, 10) = "%valueList[3]%"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Record did not include a Status"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Explain why status was missing and resubmit complete record"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "INVITE-ASSESSMENT" And ActiveCell.Offset(0, 8) = "TO BE SCHEDULED" And ActiveCell.Offset(0, 9) = "PHASE_I" And ActiveCell.Offset(0, 10) = "PASSED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 8) = "TO BE SCHEDULED" And ActiveCell.Offset(0, 9) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 10) = "TO BE SCHEDULED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_I" And ActiveCell.Offset(0, 8) = "STANDBY" And ActiveCell.Offset(0, 9) = "INVITE_TEST" And ActiveCell.Offset(0, 10) = "SCHEDULED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_I" And ActiveCell.Offset(0, 8) = "STANDBY" And ActiveCell.Offset(0, 9) = "PHASE_I" And ActiveCell.Offset(0, 10) = "STANDBY"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "STANDBY" And ActiveCell.Offset(0, 9) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 10) = "SCHEDULED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "STANDBY" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "STANDBY"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+'New conditionals to look for in spreadsheet
+
+Case ActiveCell.Offset(0, 7) = "CONDITIONAL" And ActiveCell.Offset(0, 8) = "ACCEPTED OTHER OFFER" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "PASSED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+Case ActiveCell.Offset(0, 7) = "CONDITIONAL" And ActiveCell.Offset(0, 8) = "ACCEPTED OTHER OFFER" And ActiveCell.Offset(0, 9) = "CONDITIONAL" And ActiveCell.Offset(0, 10) = "READY_POOL"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "INVIDED" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "STANDBY"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "INVIDED" And ActiveCell.Offset(0, 9) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 10) = "SCHEDULED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+
+Case ActiveCell.Offset(0, 7) = "HIRE" And ActiveCell.Offset(0, 9) = "PHASE_II"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+'New conditionals to look for in spreadsheet
+
+Case ActiveCell.Offset(0, 7) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 8) = "INVITED" And ActiveCell.Offset(0, 9) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 10) = "TO BE SCHEDULED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 8) = "INVITED" And ActiveCell.Offset(0, 9) = "PHASE_I" And ActiveCell.Offset(0, 10) = "PASSED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Duplicate Record?"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Pan"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Confirm duplicate"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+            
+'New conditions for look for in the spreadsheet
+
+Case ActiveCell.Offset(0, 7) = "INVITE_ASSESSMENT" And ActiveCell.Offset(0, 9) = "PHASE_II"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' moto the left 1 column
+            ActiveCell.FormulaR1C1 = "Application moved manually by recruiter"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+
+Case ActiveCell.Offset(0, 7) = "INVITE_TEST" And ActiveCell.Offset(0, 9) = "PHASE_I"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' moto the left 1 column
+            ActiveCell.FormulaR1C1 = "Application moved manually by recruiter"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+           
+Case ActiveCell.Offset(0, 7) = "PHASE_II" And ActiveCell.Offset(0, 8) = "STAND_BY" And ActiveCell.Offset(0, 9) = "PHASE_II" And ActiveCell.Offset(0, 10) = "CHECK_IN_COMPLETED"
+            
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' moto the left 1 column
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed" 'move to the left 1 column
+            ActiveCell.FormulaR1C1 = "Application moved manually by recruiter"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move to the left 1 column
+            ActiveCell.FormulaR1C1 = "FPMI"
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=1).Activate ' move
+            ActiveCell.FormulaR1C1 = "Check step/status in Pan and update as needed"
+                       
+            ActiveCell.Offset(rowOffset:=0, columnOffset:=-3).Activate
+            
+            
+
+
+Case Else
+         'MsgBox ("There are no updates to process")
+
+
+End Select
+
+
+ Loop
+
+        Range("a2").Activate ' goto top of page
+        
+        
+        
+'Save spreadsheet as "Integration Error Log Report1_MMDDYY.xls"
+  
+   sBoxResult = MsgBox("You have reached the end of the process. Select Ok to end or Cancel to Review", 1, "ErrorLog Process")
+    
+      
+If sBoxResult = 1 Then
+    fname = Application.GetSaveAsFilename("Integration Error Log Report1_" & Date$, fileFilter:="Excel Files (*.xls), *.xls")
+     'MsgBox ("Save as Integration Error Log Report1_MMDDYY.xls")
+     'fName = Application.GetSaveAsFilename(, fileFilter:="Excel Files (*.xls), *.xls")
+    
+    'Set Wk = Workbooks.Add
+   'Application.DisplayAlerts = True
+    'Wk.SaveAs filename:=fName
+    
+    ActiveWorkbook.SaveAs filename:= _
+    fname _
+    , FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+    ReadOnlyRecommended:=False, CreateBackup:=False
+    
+    
+    '    "D:\My Documents\Tech Support\Error Reporting\Integration Error Log Report1_012307.xls" _
+        , FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+        ReadOnlyRecommended:=False, CreateBackup:=False
+
+    
+End If
+
+'Calling another module for the Purge File Report
+    Nightly_Purge_Error.PurgeErrorPII
+
+End Sub
+
