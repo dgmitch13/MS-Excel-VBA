@@ -1,0 +1,65 @@
+Sub Cert_SortColumns()
+'
+' SortColumns Macro
+' Macro recorded 1/17/2007 by Don Mitchelll
+' Auto sort columns
+
+'
+
+    Dim fname
+    Dim filetoopen
+        
+    'Workbooks.Add
+
+    filetoopen = Application _
+    .GetOpenFilename("Excel Files (*.xls), *.xls")
+        If filetoopen <> False Then
+            MsgBox "Open " & filetoopen
+        End If
+
+'Workbooks.OpenText filename:=filetoopen, StartRow:=1, _
+'DataType:=xlDelimited, Tab:=True
+
+fileData = "Excel;" + filetoopen
+
+    
+
+    Range("A2:h5000").Select
+    'Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    ActiveCell.Offset(rowOffset:=0, columnOffset:=3).Select
+    
+        Selection.Sort Key1:=Range("A2"), Order1:=xlAscending, Key2:=Range("B2") _
+        , Order2:=xlAscending, Header:=xlNo, OrderCustom:=1, MatchCase:=False, _
+        Orientation:=xlTopToBottom, DataOption1:=xlSortNormal, DataOption2:= _
+        xlSortNormal
+        
+    'Range("D2:H500").Select
+    Range("D2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.Sort Key1:=Range("D2"), Order1:=xlAscending, Key2:=Range("E2") _
+        , Order2:=xlAscending, Order3:=xlAscending, Header:= _
+        xlNo, OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, _
+        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal
+        
+      
+   'Key3:=Range("F2")' taking out of above sort'
+   ', DataOption3:= _xlSortNormal
+   
+    fname = Application.GetSaveAsFilename("Cert" & Date$, fileFilter:="Excel Files (*.xls), *.xls")
+     'MsgBox ("Save as Integration Error Log Report1_MMDDYY.xls")
+     'fName = Application.GetSaveAsFilename(, fileFilter:="Excel Files (*.xls), *.xls")
+    
+    'Set Wk = Workbooks.Add
+   'Application.DisplayAlerts = True
+    'Wk.SaveAs filename:=fName
+    
+    ActiveWorkbook.SaveAs filename:= _
+    fname _
+    , FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+    ReadOnlyRecommended:=False, CreateBackup:=False
+
+   
+   
+End Sub
+
