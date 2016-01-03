@@ -1,0 +1,104 @@
+Sub CompriseEmail()
+'This may only work in window version of excel.  In Mac 2011, you will need to add go here
+    'https://support.microsoft.com/en-us/kb/145759 for a resolution.  In short, you will need to add the  Dao3032.dll file.
+
+
+    Dim msg As Outlook.MailItem
+    Dim ExpireStr As String
+    Dim ExpireSub As String
+    Dim ExpireRec As String
+    Dim ExpireCC As String
+    Dim DataWareStr As String
+    Dim DataWareSub As String
+    Dim DataWareRec As String
+    Dim DataWareCC As String
+    Dim PanStr As String
+    Dim PanSub As String
+    Dim PanRec As String
+    Dim PanCC As String
+    Dim CertStr As String
+    Dim CertSub As String
+    Dim CertRec As String
+    Dim CertCC As String
+
+    Set msg = Application.CreateItem(olMailItem)
+    Set myOlApp = CreateObject("Outlook.Application")
+    Set myItem = myOlApp.CreateItem(olMailItem)
+    Set myAttachments = myItem.Attachments
+    myAttachments.Add "C:\My Documents\Q496.xls"', _
+    'olByValue, 1, "4th Quarter 1996 Results Chart"
+
+    ExpireStr = "Hello all, Please find the expiration files attached to this e-mail"
+    ExpireSub = "Expiration files"
+    ExpireRec = "['add your list of receipents']"
+    ExpireCC = "['add your list of receipents']"
+    
+    DataWareStr = "Hi Stevie,  This should get you up to date as of November 02, 2007.  Thanks"
+    DataWareSub = "Data warehouse files (1 of 1)"
+    DataWareRec = "['add your list of receipents']"
+    DataWareCC = "['add your list of receipents']"
+    
+    PanStr = "Please find the Integration Error log analysis report for 11/02 only attached to this e-mail. Please let me know if you have any questions"
+    PanSub = "Integration Error log Analysis Report"
+    PanRec = "['add your list of receipents']"
+    
+    CertStr = "CERT matched today."
+    CertSub = "CERT for 11/02/07"
+    CertRec = "['add your list of receipents']"
+    CertCC = ""
+
+    'open for attachments
+    Dim Count
+    Dim Result As String
+        
+    Count = 0
+    Count = Count + 1
+         
+      
+Select Case  count = 1 
+    
+    Result = MsgBox("Do you want to run", vbYesNo, "Expiration Report")
+    Cast Result = 6          '6 = yes 7 = no
+                       
+              msg.Subject = ExpireSub
+              msg.Recipients = ExpireRec
+              msg.CC = ExpireCC
+              msg.Body = ExpireStr
+              msg.Display
+                        
+              myAttachments.Add "D:\My Documents\Tech Support\Expiration Report Files"          
+                            
+              Result = MsgBox("Do you want to run", vbYesNo, "Data Warehouse Report")
+              
+    Case Result = 6
+                
+              msg.Subject = DataWareSub
+              msg.Recipients = DataWareRec
+              msg.CC = DataWareCC
+              msg.Body = DataWareStr
+              msg.Display
+                 
+              Result = MsgBox("Do you want to run", vbYesNo, "Integration Error Report")
+                                   
+    Case Result = 6
+                                  
+              msg.Subject = CertStr
+              msg.Recipients = CertSub
+              msg.CC = CertRec
+              msg.Body = CertCC
+              msg.Display
+
+              Result = MsgBox("Do you want to run", vbYesNo, "Cert Reporting")
+               
+     Case Else
+     		Count >1 
+                MsgBox ("count as malfunction")
+                Exit Sub
+     
+End Select 
+   
+    Set msg = Nothing
+  
+End Sub
+
+
