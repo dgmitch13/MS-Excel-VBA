@@ -1,0 +1,40 @@
+Sub NoEmailUDF()
+'This macro structure and label no email candidates
+'Changed sub name from NoEmail to NoEmailUDF, excel was getting confused by names
+
+Dim rEmailCand
+Dim rLength
+
+rEmailCand = ActiveCell.FormulaR1C1
+                                                                                                                                                                                                     
+Do While rEmailCand <> ""
+
+
+rEmailCand = ActiveCell.FormulaR1C1
+rLength = Len(ActiveCell.FormulaR1C1)
+rLength = ((rLength - 5) / 3) + 2
+rEmailCand = Left(rEmailCand, rLength)
+rLength = rLength - 1
+rEmailCand = Right(rEmailCand, rLength)
+rLength = rLength - 1
+rEmailCand = Left(rEmailCand, rLength)
+
+ ActiveCell.FormulaR1C1 = rEmailCand
+ ActiveCell.Offset(rowOffset:=0, columnOffset:=2).Activate ' move to the left 1 column
+ ActiveCell.FormulaR1C1 = "Candidates without email."
+ ActiveCell.Offset(rowOffset:=0, columnOffset:=-2).Activate
+                                                                                                                                                                                                
+                                                                                                                                                                                                     
+ActiveCell.Offset(1, 0).Activate 'loop through column A
+rEmailCand = ActiveCell.FormulaR1C1
+                                                                                                                                                                                                     
+ Loop
+       
+
+
+
+End Sub
+
+
+
+
