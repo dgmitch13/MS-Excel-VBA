@@ -1,0 +1,11 @@
+Private Sub Workbook_open()
+
+    Call AddMenus
+
+End Sub
+
+Private Sub Workbook_Beforeclose(CANCEL As Boolean)
+
+    Call DeleteTSAMenu
+
+End Sub
