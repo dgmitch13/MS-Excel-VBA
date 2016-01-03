@@ -1,0 +1,134 @@
+Sub PurgeErrorPII()
+
+' importpurge Macro
+' Macro recorded 1/24/2007 by Don Mitchelll
+'"TEXT;D:\My Documents\Tech Support\Error Reporting\Purge file 1242007.TXT", _
+'Change name for clarification to excel
+
+Dim filetoopen
+Dim fileData
+Dim newsheetname As String
+
+
+'donald = "TEXT;D:\My Documents\Tech Support\Error Reporting\Purge file 1242007.TXT"
+'ChDir "D:\My Documents\Tech Support\Error Reporting"
+
+
+Worksheets("Nightly Purge Error").Activate
+
+MsgBox ("You are now on the Nightly Purge Error Section, if you have to make changes on the Purge Error Report do so after this process is complete.  Thanks")
+
+filetoopen = Application _
+    .GetOpenFilename("Text Files (*.txt), *.txt")
+If filetoopen <> False Then
+    MsgBox "Open " & filetoopen
+End If
+
+If filetoopen = False Then
+    MsgBox ("You selected cancel, application will close now")
+    Application.Quit
+End If
+
+fileData = "TEXT;" + filetoopen
+
+ '   Workbooks.OpenText filename:=fileData, StartRow:=1, _
+ '   DataType:=xlDelimited, Tab:=False
+'
+  '  Range("A1").Select
+    'ActiveSheet.Paste
+
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        fileData, _
+        Destination:=Range("A2"))
+        .Name = fileData
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .RefreshStyle = xlInsertDeleteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .TextFilePromptOnRefresh = False
+        .TextFilePlatform = 437
+        .TextFileStartRow = 1
+        .TextFileParseType = xlDelimited
+        .TextFileTextQualifier = xlTextQualifierDoubleQuote
+        .TextFileConsecutiveDelimiter = False
+        .TextFileTabDelimiter = True
+        .TextFileSemicolonDelimiter = False
+        .TextFileCommaDelimiter = False
+        .TextFileSpaceDelimiter = False
+        .TextFileColumnDataTypes = Array(1, 1, 1)
+        .TextFileTrailingMinusNumbers = True
+        .Refresh BackgroundQuery:=False
+    End With
+ 
+    Range("a2").Activate
+ 
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.AdvancedFilter Action:=xlFilterInPlace, Unique:=True
+    'Range("A1:C216").AdvancedFilter Action:=xlFilterInPlace, Unique:=True 'pass the diminision
+
+   'move data to a new sheet for later reference
+    Selection.Copy
+    
+    'create new sheet and rename it "temporary" for holding sorted data
+             
+     Sheets.Add Type:="Worksheet"
+     newsheetname = "Temporary"
+    
+     With ActiveSheet
+        .Name = newsheetname
+     End With
+     
+    Worksheets("Temporary").Range("a2").Activate
+    ActiveSheet.Paste
+      
+    'delete duplicate data
+    Worksheets("Nightly Purge Error").Activate
+    
+    'Range("A2").Activate
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+
+    ActiveSheet.ShowAllData
+    Selection.ClearContents
+    Selection.Delete Shift:=xlUp
+    
+    'move sorted data back to top of spreadsheet
+    Worksheets("Temporary").Activate
+    
+    'Range("a2").Activate
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.Copy
+    Worksheets("Nightly Purge Error").Activate
+    
+    'Range("A2").Activate
+    ActiveSheet.Paste
+              
+    If ActiveCell.Value = "Candidate" Then
+      Rows("2:2").Select
+      Selection.Delete Shift:=xlUp
+    End If
+    
+    'Sort of the data
+     'Range("A2").Select
+     Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+         
+        Selection.Sort Key1:=Range("A2"), Order1:=xlAscending, Key2:=Range("B2") _
+        , Order2:=xlAscending, Key3:=Range("C2"), Order3:=xlAscending, Header:= _
+        xlGuess, OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, _
+        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal, DataOption3:= _
+        xlSortNormal
+        
+    'Delete "Temporary" worksheet
+    Application.DisplayAlerts = False
+    Worksheets("Temporary").Delete
+    Application.DisplayAlerts = True
+
+    'save current data on worksheet
+    ActiveWorkbook.Save
+
+End Sub
