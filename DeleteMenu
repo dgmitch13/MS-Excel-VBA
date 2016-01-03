@@ -1,0 +1,6 @@
+Sub DeleteMenu()
+    
+On Error Resume Next
+Application.CommandBars("Worksheet Menu Bar").Controls("&Menu").Delete
+    On Error GoTo 0
+End Sub
