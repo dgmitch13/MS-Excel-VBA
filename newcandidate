@@ -1,0 +1,434 @@
+
+Sub newcandidate()
+'
+' newcandidate Macro
+' Macro recorded 11/16/2007 by Don Mitchelll
+'
+'Add Section:
+''capture total number of lines for comparison on file creation before close
+
+
+
+'Declarations
+   Dim strState
+   Dim StateCount
+   Dim strError
+   Dim strStateChk
+   Dim strCellCount
+   Dim count
+   Dim strHeader
+   Dim ugh 'string used for testing
+'------------
+
+  
+    filetoopen = Application _
+    .GetOpenFilename("Text Files (*.txt), *.txt")
+        If filetoopen <> False Then
+            MsgBox "Open " & filetoopen
+        End If
+        
+        If filetoopen = False Then
+             MsgBox ("You selected cancel, application will close now")
+             Application.Quit
+                     End If
+        
+    Workbooks.OpenText filename:=filetoopen, StartRow:=1, _
+    DataType:=xlDelimited, Tab:=True
+'
+    Range("A2").Select
+    'ActiveSheet.Paste
+    Selection.TextToColumns Destination:=Range("A1"), DataType:=xlDelimited, _
+        TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
+        Semicolon:=False, Comma:=False, Space:=False, Other:=True, OtherChar _
+        :="|", FieldInfo:=Array(Array(1, 1), Array(2, 1), Array(3, 1), Array(4, 1), Array(5, _
+        1), Array(6, 1), Array(7, 1), Array(8, 1), Array(9, 1), Array(10, 1), Array(11, 1), Array(12 _
+        , 1), Array(13, 1), Array(14, 1), Array(15, 1), Array(16, 1), Array(17, 1), Array(18, 1), _
+        Array(19, 1), Array(20, 1), Array(21, 1), Array(22, 1), Array(23, 1)), _
+        TrailingMinusNumbers:=True
+
+ 
+    Range("J2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    strCellCount = Selection.count / 14
+    Range("J2").Select
+    strState = ActiveCell.Cells
+    count = 0
+
+    
+Call donState(strCellCount, count)
+ 
+Call donEthic(strCellCount, count)
+
+'end
+ '----------------------
+ 
+ 
+    Range("A1").Select
+    strHeader = ActiveCell.text
+    strHeader = Mid(strHeader, 4)
+    strHeader = "CHS" + strHeader
+    ActiveCell.Value = strHeader
+    
+    
+    
+Call PrintMe
+    
+
+End Sub
+
+Function PrintMe()
+
+    Dim Misc, Misc1, Misc2, Misc3, Misc4, Misc5, Misc6, Misc7, Misc8, Misc9, Misc10
+    Dim Misc11, Misc12, Misc13, Misc14, Misc15, Misc16, Misc17, Misc18, Misc19, Misc20
+    Dim Misc21, Misc22
+    
+    Dim CurrRow, LastRow
+    
+    Dim Piper
+    
+    'Dim Addr, Space, CCC, SCC, CBN, SC, CurrRow, LastRow, don
+    
+    Piper = "|"
+    
+    
+    'Sheets("Revised").Select
+    Sheets("rs").Select
+    CarrRet = Chr(13)
+    
+    Close #1
+    'Open "FlatFile" & Application.Text(Now(), "mmdd") & ".TXT" For Output As #1
+    Open "filename" & Application.text(Now(), "mmdd") & ".TXT" For Output As #1
+    LastRow = Application.CountA(ActiveSheet.Range("A:A"))
+    For CurrRow = 1 To LastRow
+            If CurrRow = 1 Then
+        Misc = Right(Cells(CurrRow, 1), 1) & Piper
+        Misc1 = LTrim(RTrim(Cells(CurrRow, 2))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 3))) & Piper
+        Misc3 = LTrim(RTrim(Cells(CurrRow, 4)))
+     
+      Else
+        
+        Misc = LTrim(RTrim(Cells(CurrRow, 1))) & Piper
+        Misc1 = LTrim(RTrim(Cells(CurrRow, 2))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 3))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 4))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 5))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 6))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 7))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 8))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 9))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 10))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 11))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 12))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 13))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 14))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 15))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 16))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 17))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 18))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 19))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 20))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 21))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 22))) & Piper
+        Misc2 = LTrim(RTrim(Cells(CurrRow, 22))) & CarrRet
+        
+      End If
+
+       
+        Print #1,
+    Next
+        Close #1
+    MsgBox "Done ------------------>"
+   
+
+'   ActiveCell.FormulaR1C1 = "CHS_Candidate_20071113_175745.dat"
+   ' Range("C5").Select
+    'ChDir "D:\My Documents\Tech Support\New Canadidate Files"
+   ' fName = Application.GetSaveAsFilename(fileFilter:="Text Files (*.txt), *.txt")
+
+
+    'fName = Application.GetSaveAsFilename("Integration Error Log Report1_" & Date$, fileFilter:="Excel Files (*.xls), *.xls")
+     'MsgBox ("Save as Integration Error Log Report1_MMDDYY.xls")
+     'fName = Application.GetSaveAsFilename(, fileFilter:="Excel Files (*.xls), *.xls")
+    
+    'Set Wk = Workbooks.Add
+   'Application.DisplayAlerts = True
+    'Wk.SaveAs filename:=fName
+    
+  '  ActiveWorkbook.SaveAs Filename:= _
+   'fName '_
+    ', FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+   ' ReadOnlyRecommended:=False, CreateBackup:=False
+
+    
+    
+   ' ActiveWorkbook.SaveAs Filename:= _
+      '  "D:\My Documents\Tech Support\New Canadidate Files\Book1.txt", FileFormat:= _
+
+
+
+
+
+End Function
+Public Function donState(strCellCount, count)
+
+Do While count <> strCellCount
+
+    count = count + 1
+    strState = ActiveCell.Cells
+                                                  
+If UCase(strState) = "ALABAMA" Then ' the offset is at zero from where the cursor starts pos = right and neg = left
+ActiveCell.FormulaR1C1 = "AL"
+End If
+              
+ '----------------------
+ 'new code
+ If UCase(strState) = "ARIZONA" Then
+ActiveCell.FormulaR1C1 = "AZ"
+End If
+If UCase(strState) = "ALASKA" Then
+ActiveCell.FormulaR1C1 = "AK"
+End If
+If UCase(strState) = "AMERICAN SAMOA" Then
+ActiveCell.FormulaR1C1 = "AS"
+End If
+If UCase(strState) = "ARIZONA" Then
+ActiveCell.FormulaR1C1 = "AZ"
+End If
+If UCase(strState) = "ARKANSAS" Then
+ActiveCell.FormulaR1C1 = "AR"
+End If
+If UCase(strState) = "CALIFORNIA" Then
+ActiveCell.FormulaR1C1 = "CA"
+End If
+If UCase(strState) = "COLORADO" Then
+ActiveCell.FormulaR1C1 = "CO"
+End If
+If UCase(strState) = "CONNECTICUT" Then
+ActiveCell.FormulaR1C1 = "CT"
+End If
+If UCase(strState) = "DELAWARE" Then
+ActiveCell.FormulaR1C1 = "DE"
+End If
+If UCase(strState) = "DISTRICT OF COLUMBIA" Then
+ActiveCell.FormulaR1C1 = "DC"
+End If
+If UCase(strState) = "FEDERATED STATES OF MICRONESIA" Then
+ActiveCell.FormulaR1C1 = "FM"
+End If
+If UCase(strState) = "FLORIDA" Then
+ActiveCell.FormulaR1C1 = "FL"
+End If
+If UCase(strState) = "GEORGIA" Then
+ActiveCell.FormulaR1C1 = "GA"
+End If
+If UCase(strState) = "GUAM" Then
+ActiveCell.FormulaR1C1 = "GU"
+End If
+If UCase(strState) = "HAWAII" Then
+ActiveCell.FormulaR1C1 = "HI"
+End If
+If UCase(strState) = "IDAHO" Then
+ActiveCell.FormulaR1C1 = "ID"
+End If
+If UCase(strState) = "ILLINOIS" Then
+ActiveCell.FormulaR1C1 = "IL"
+End If
+If UCase(strState) = "INDIANA" Then
+ActiveCell.FormulaR1C1 = "IN"
+End If
+If UCase(strState) = "IOWA" Then
+ActiveCell.FormulaR1C1 = "IA"
+End If
+If UCase(strState) = "KANSAS" Then
+ActiveCell.FormulaR1C1 = "KS"
+End If
+If UCase(strState) = "KENTUCKY" Then
+ActiveCell.FormulaR1C1 = "KY"
+End If
+If UCase(strState) = "LOUISIANA" Then
+ActiveCell.FormulaR1C1 = "LA"
+End If
+If UCase(strState) = "MAINE" Then
+ActiveCell.FormulaR1C1 = "ME"
+End If
+If UCase(strState) = "MARSHALL ISLANDS" Then
+ActiveCell.FormulaR1C1 = "MH"
+End If
+If UCase(strState) = "MARYLAND" Then
+ActiveCell.FormulaR1C1 = "MD"
+End If
+If UCase(strState) = "MASSACHUSETTS" Then
+ActiveCell.FormulaR1C1 = "MA"
+End If
+If UCase(strState) = "MICHIGAN" Then
+ActiveCell.FormulaR1C1 = "MI"
+End If
+If UCase(strState) = "MINNESOTA" Then
+ActiveCell.FormulaR1C1 = "MN"
+End If
+If UCase(strState) = "MISSISSIPPI" Then
+ActiveCell.FormulaR1C1 = "MS"
+End If
+If UCase(strState) = "MISSOURI" Then
+ActiveCell.FormulaR1C1 = "MO"
+End If
+If UCase(strState) = "MONTANA" Then
+ActiveCell.FormulaR1C1 = "MT"
+End If
+If UCase(strState) = "NEBRASKA" Then
+ActiveCell.FormulaR1C1 = "NE"
+End If
+If UCase(strState) = "NEVADA" Then
+ActiveCell.FormulaR1C1 = "NV"
+End If
+If UCase(strState) = "NEW HAMPSHIRE" Then
+ActiveCell.FormulaR1C1 = "NH"
+End If
+If UCase(strState) = "NEW JERSEY" Then
+ActiveCell.FormulaR1C1 = "NJ"
+End If
+If UCase(strState) = "NEW MEXICO" Then
+ActiveCell.FormulaR1C1 = "NM"
+End If
+If UCase(strState) = "NEW YORK" Then
+ActiveCell.FormulaR1C1 = "NY"
+End If
+If UCase(strState) = "NORTH CAROLINA" Then
+ActiveCell.FormulaR1C1 = "NC"
+End If
+If UCase(strState) = "NORTH DAKOTA" Then
+ActiveCell.FormulaR1C1 = "ND"
+End If
+If UCase(strState) = "NORTHERN MARIANA ISLANDS" Then
+ActiveCell.FormulaR1C1 = "MP"
+End If
+If UCase(strState) = "OHIO" Then
+ActiveCell.FormulaR1C1 = "OH"
+End If
+If UCase(strState) = "OKLAHOMA" Then
+ActiveCell.FormulaR1C1 = "OK"
+End If
+If UCase(strState) = "OREGON" Then
+ActiveCell.FormulaR1C1 = "OR"
+End If
+If UCase(strState) = "PALAU" Then
+ActiveCell.FormulaR1C1 = "PW"
+End If
+If UCase(strState) = "PENNSYLVANIA" Then
+ActiveCell.FormulaR1C1 = "PA"
+End If
+If UCase(strState) = "PUERTO RICO" Then
+ActiveCell.FormulaR1C1 = "PR"
+End If
+If UCase(strState) = "RHODE ISLAND" Then
+ActiveCell.FormulaR1C1 = "RI"
+End If
+If UCase(strState) = "SOUTH CAROLINA" Then
+ActiveCell.FormulaR1C1 = "SC"
+End If
+If UCase(strState) = "SOUTH DAKOTA" Then
+ActiveCell.FormulaR1C1 = "SD"
+End If
+If UCase(strState) = "TENNESSEE" Then
+ActiveCell.FormulaR1C1 = "TN"
+End If
+If UCase(strState) = "TEXAS" Then
+ActiveCell.FormulaR1C1 = "TX"
+End If
+If UCase(strState) = "UTAH" Then
+ActiveCell.FormulaR1C1 = "UT"
+End If
+If UCase(strState) = "VERMONT" Then
+ActiveCell.FormulaR1C1 = "VT"
+End If
+If UCase(strState) = "VIRGIN ISLANDS" Then
+ActiveCell.FormulaR1C1 = "VI"
+End If
+If UCase(strState) = "VIRGINIA" Then
+ActiveCell.FormulaR1C1 = "VA"
+End If
+If UCase(strState) = "WASHINGTON" Then
+ActiveCell.FormulaR1C1 = "WA"
+End If
+If UCase(strState) = "WEST VIRGINIA" Then
+ActiveCell.FormulaR1C1 = "WV"
+End If
+If UCase(strState) = "WISCONSIN" Then
+ActiveCell.FormulaR1C1 = "WI"
+End If
+If UCase(strState) = "WYOMING" Then
+ActiveCell.FormulaR1C1 = "WY"
+End If
+  
+ 'end of new code
+ '--------------------
+ 'add error checking on failure
+             
+         If count > strCellCount Then
+          MsgBox ("Count exceeded the numbers of for selected....Exit Loop")
+          Stop
+         End If
+              
+'increment 1 row per past
+ActiveCell.Offset(rowOffset:=1, columnOffset:=0).Activate
+              
+Loop
+
+
+End Function
+
+Public Function donEthic(strCellCount, count)
+
+'new set of code for ethic background
+'reset all counters
+'strCellCount 'count should not change from previous count
+
+'Finding column T
+Range("T2").Select
+'ActiveCell.Offset(rowOffset:=0, columnOffset:=10).Activate
+'Range("T2").Select
+    
+strEthic = ActiveCell.Cells
+
+'strState = ""
+count = 0
+
+Do While count <> strCellCount
+
+    count = count + 1
+    strEthic = ActiveCell.Cells
+
+    If strEthic = "White (Not of Hispanic origin)" Then
+        ActiveCell.FormulaR1C1 = "6"
+    End If
+    
+    If strEthic = "Black (Not of Hispanic origin)" Then
+        ActiveCell.FormulaR1C1 = "5"
+    End If
+    
+    If strEthic = "Hispanic" Then
+         ActiveCell.FormulaR1C1 = "7"
+    End If
+     
+    If strEthic = "Asian or Pacific Islander" Then
+        ActiveCell.FormulaR1C1 = "3"
+    End If
+    
+    If strEthic = "American Indian or Alaskan Native" Then
+        ActiveCell.FormulaR1C1 = "2"
+    End If
+    
+    If strEthic = "N/S" Then
+        ActiveCell.FormulaR1C1 = "0"
+    End If
+
+ActiveCell.Offset(rowOffset:=1, columnOffset:=0).Activate
+
+
+Loop
+
+
+End Function
+
+
