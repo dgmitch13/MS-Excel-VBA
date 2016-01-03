@@ -1,0 +1,186 @@
+Sub PurgeError()
+
+' Import Expiration File Macro
+' Macro recorded 2/01/2007 by Don Mitchelll
+
+Dim filetoopen
+Dim fileData
+Dim newsheetname As String
+
+
+'Worksheets("Nightly Purge Error").Activate
+
+'MsgBox ("You are now on the Nightly Purge Error Section, if you have to make changes on the Purge Error Report do so after this process is complete.  Thanks")
+
+Workbooks.Add
+
+filetoopen = Application _
+    .GetOpenFilename("Text Files (*.txt), *.txt")
+If filetoopen <> False Then
+    MsgBox "Open " & filetoopen
+End If
+
+If filetoopen = False Then
+    MsgBox ("You selected cancel, application will close now")
+    Application.Quit
+End If
+
+
+'Workbooks.OpenText filename:=filetoopen, StartRow:=1, _
+'DataType:=xlDelimited, Tab:=True
+
+fileData = "TEXT;" + filetoopen
+'________________________________________________________________________________________________________________
+
+'
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        fileData, _
+        Destination:=Range("A1"))
+        .Name = fileData
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .RefreshStyle = xlInsertDeleteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .TextFilePromptOnRefresh = False
+        .TextFilePlatform = 437
+        .TextFileStartRow = 1
+        .TextFileParseType = xlDelimited
+        .TextFileTextQualifier = xlTextQualifierDoubleQuote
+        .TextFileConsecutiveDelimiter = False
+        .TextFileTabDelimiter = True
+        .TextFileSemicolonDelimiter = False
+        .TextFileCommaDelimiter = False
+        .TextFileSpaceDelimiter = True
+        .TextFileColumnDataTypes = Array(9, 9, 1, 1, 1, 1)
+        .TextFileTrailingMinusNumbers = True
+        .Refresh BackgroundQuery:=False
+    End With
+    
+   'Setup columns
+    Range("B1").Activate
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlToLeft
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = "ID"
+    Range("B1").Select
+    ActiveCell.FormulaR1C1 = "SSN"
+    Range("C1").Select
+    ActiveCell.FormulaR1C1 = "DATE"
+    Range("D1").Select
+    ActiveCell.FormulaR1C1 = "REASON"
+    Range("A1:D1").Select
+    Range("D1").Activate
+    With Selection.Interior
+        .ColorIndex = 43
+        .Pattern = xlSolid
+    End With
+    Selection.Font.Bold = True
+    Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    
+    'Range("A2:D1398").Select
+    'Range("A1:D1398").AdvancedFilter Action:=xlFilterInPlace, Unique:=True
+    'Range("A2:D1396").AdvancedFilter Action:=xlFilterInPlace, Unique:=True
+    Selection.AdvancedFilter Action:=xlFilterInPlace, Unique:=True
+'    ActiveWindow.SmallScroll Down:=-9
+    Selection.Copy
+    
+    'create new sheet and rename it "temporary" for holding sorted data
+             
+     Sheets.Add Type:="Worksheet"
+     newsheetname = "Temporary"
+    
+     With ActiveSheet
+        .Name = newsheetname
+     End With
+     
+    Worksheets("Temporary").Range("a2").Activate
+    ActiveSheet.Paste
+      
+    'delete duplicate data
+    Worksheets("Sheet1").Activate
+    
+    'Range("A2").Activate
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+
+    ActiveSheet.ShowAllData
+    Selection.ClearContents
+    Selection.Delete Shift:=xlUp
+    
+    'move sorted data back to top of spreadsheet
+    Worksheets("Temporary").Activate
+    
+    'Range("a2").Activate
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.Copy
+    Worksheets("Sheet1").Activate
+    
+    'Range("A2").Activate
+    ActiveSheet.Paste
+
+    'Delete Temporary worksheet
+    Application.DisplayAlerts = False
+    Worksheets("Temporary").Delete
+    Application.DisplayAlerts = True
+
+'------------------------------------------------------------------
+    Selection.Sort Key1:=Range("A2"), Order1:=xlAscending, Key2:=Range("B2") _
+        , Order2:=xlAscending, Key3:=Range("C2"), Order3:=xlAscending, Header:= _
+        xlGuess, OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, _
+        DataOption1:=xlSortNormal, DataOption2:=xlSortNormal, DataOption3:= _
+        xlSortNormal
+    'Selection.Sort Key1:=Range("D2"), Order1:=xlAscending, Header:=xlGuess, _
+    '    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, _
+    '    DataOption1:=xlSortNormal
+    'ActiveWindow.SmallScroll Down:=-3
+     Range("A1").Select
+     Selection.AutoFilter
+   ' ActiveCell.Offset(rowOffset:=0, columnOffset:=0).Activate
+    Selection.AutoFilter Field:=4, Criteria1:="purgereason=""4""/>"
+    Range("A2").Select
+    Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+    Selection.ClearContents
+    
+    'add delete up to get rid of blanks
+    Selection.Delete Shift:=xlUp
+    'Selection.EntireRow.Delete
+
+    Selection.AutoFilter Field:=4
+    Range("A2").Select
+    Range("A1:D271").Sort Key1:=Range("A2"), Order1:=xlAscending, Key2:=Range _
+        ("B2"), Order2:=xlAscending, Key3:=Range("C2"), Order3:=xlAscending, _
+        Header:=xlGuess, OrderCustom:=1, MatchCase:=False, Orientation:= _
+        xlTopToBottom, DataOption1:=xlSortNormal, DataOption2:=xlSortNormal, _
+        DataOption3:=xlSortNormal
+    'ActiveWindow.ScrollRow = 4
+'------------------------------------------------------------------------------
+    
+    'save current data on worksheet
+    'ActiveWorkbook.Save
+
+    fname = Application.GetSaveAsFilename("Exp" & Date$, fileFilter:="Excel Files (*.xls), *.xls")
+     'MsgBox ("Save as Integration Error Log Report1_MMDDYY.xls")
+     'fName = Application.GetSaveAsFilename(, fileFilter:="Excel Files (*.xls), *.xls")
+    
+    'Set Wk = Workbooks.Add
+   'Application.DisplayAlerts = True
+    'Wk.SaveAs filename:=fName
+    
+    ActiveWorkbook.SaveAs filename:= _
+    fname _
+    , FileFormat:=xlNormal, Password:="", WriteResPassword:="", _
+    ReadOnlyRecommended:=False, CreateBackup:=False
+
+
+    ActiveWorkbook.Close
+
+
+End Sub
+
+
